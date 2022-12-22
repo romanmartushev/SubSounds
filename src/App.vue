@@ -14,10 +14,6 @@ export default {
           clientId: import.meta.env.VITE_CLIENT_ID,
           skipUpdatingEmotesets: true,
         },
-        identity: {
-          username: import.meta.env.VITE_TWITCH_CHANNEL,
-          password: import.meta.env.VITE_TWITCH_OAUTH,
-        },
       },
       broadcaster: import.meta.env.VITE_TWITCH_CHANNEL,
       eventQueue: new EventQueue(),

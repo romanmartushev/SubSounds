@@ -24,7 +24,7 @@ npm run dev
 
 ## For Stream
 
-Go to https://dev.twitch.tv/docs/api/get-started to create a Client ID, Client Secret, OAuth Key. Once you have these 3. Copy contents of `.env.example` into a new file `.env` put newly created values into respective variables. Twitch Channel should be replaced with your own as well.
+Go to https://dev.twitch.tv/docs/api/get-started to create a Client ID, Client Secret. Copy contents of `.env.example` into a new file `.env` put newly created values into respective variables. Twitch Channel should be replaced with your own as well.
 
 For a new sub sound, place mp3 files in `public/subSounds/` they should be named [subscriber name].mp3
 
