@@ -14,6 +14,10 @@ export default {
           clientId: import.meta.env.VITE_CLIENT_ID,
           skipUpdatingEmotesets: true,
         },
+        identity: {
+          username: import.meta.env.VITE_TWITCH_CHANNEL,
+          password: import.meta.env.VITE_TWITCH_OAUTH,
+        },
       },
       broadcaster: import.meta.env.VITE_TWITCH_CHANNEL,
       eventQueue: new EventQueue(),
@@ -59,15 +63,6 @@ export default {
       this.subSound(context);
     },
     subSound(context) {
-      /**
-       * To test set if condition to:
-       * context.subscriber
-       *
-       * for stream set if to:
-       * context.subscriber &&
-       * !this.subs.has(context.username) &&
-       * context.username !== this.broadcaster
-       */
       if (
         context.subscriber &&
         !this.subs.has(context.username) &&
@@ -97,6 +92,9 @@ export default {
             });
           });
         this.subs.add(context);
+        if (parseInt(context.badges.subscriber) >= 2000) {
+          this.client.say(this.broadcaster, `!so @${context["display-name"]}`);
+        }
       }
     },
     playSound(sound) {
