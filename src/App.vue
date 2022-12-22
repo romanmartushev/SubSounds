@@ -19,6 +19,7 @@ export default {
           password: import.meta.env.VITE_TWITCH_OAUTH,
         },
       },
+      config: {},
       broadcaster: import.meta.env.VITE_TWITCH_CHANNEL,
       eventQueue: new EventQueue(),
       subs: useSubStore(),
@@ -32,6 +33,7 @@ export default {
     };
   },
   async mounted() {
+    this.getConfig();
     this.client = new tmi.client(this.opts);
     this.client.on("message", this.onMessageHandler);
     this.client.on("connected", this.onConnectedHandler);
@@ -61,6 +63,16 @@ export default {
     },
     onMessageHandler(target, context, msg, self) {
       this.subSound(context);
+    },
+    getConfig() {
+      const vm = this;
+      axios
+        .get("/config.json", {
+          responseType: "json",
+        })
+        .then((response) => {
+          vm.config = response.data;
+        });
     },
     subSound(context) {
       if (
@@ -92,10 +104,43 @@ export default {
             });
           });
         this.subs.add(context);
-        if (parseInt(context.badges.subscriber) >= 2000) {
+        this.handleShoutOut(context);
+      }
+    },
+    handleShoutOut(context) {
+      const autoShouout = this.config.automated_shoutouts["value"];
+      if (this.config.automated_shoutouts["value"] !== "None") {
+        if (
+          autoShouout === "Tier 1" &&
+          parseInt(context.badges.subscriber) >= 1000
+        ) {
+          this.client.say(this.broadcaster, `!so @${context["display-name"]}`);
+        } else if (
+          autoShouout === "Tier 2" &&
+          parseInt(context.badges.subscriber) >= 2000
+        ) {
+          this.client.say(this.broadcaster, `!so @${context["display-name"]}`);
+        } else if (
+          autoShouout === "Tier 3" &&
+          parseInt(context.badges.subscriber) >= 3000
+        ) {
           this.client.say(this.broadcaster, `!so @${context["display-name"]}`);
         }
       }
+    },
+    getPosition() {
+      const placements = {
+        "center center": "justify-center items-center",
+        "center left": "justify-center items-start",
+        "center right": "justify-center items-end",
+        "top center": "justify-start items-center",
+        "top left": "justify-start items-start",
+        "top right": "justify-start items-end",
+        "bottom center": "justify-end items-center",
+        "bottom left": "justify-end items-start",
+        "bottom right": "justify-end items-end",
+      };
+      return placements[this.config.sub_alert_placement["value"]];
     },
     playSound(sound) {
       return new Promise((resolve) => {
@@ -129,10 +174,15 @@ export default {
 <template>
   <transition name="bounce">
     <div
-      class="absolute w-full h-full flex flex-col justify-center items-center"
+      class="absolute w-full h-full flex flex-col p-4"
+      :class="getPosition()"
       v-if="modal.active"
     >
-      <img class="w-1/5" :src="modal.src" />
+      <img
+        v-if="config.enable_profile_picture['value']"
+        class="w-1/5"
+        :src="modal.src"
+      />
       <h2 class="text-5xl mt-1 p-2 pl-6 bg-black text-white">
         {{ modal.text }}
       </h2>

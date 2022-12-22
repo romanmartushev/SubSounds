@@ -9,10 +9,12 @@
   },
   "dependencies": {
     "axios": "^0.27.2",
+    "file-saver": "^2.0.5",
     "pinia": "^2.0.14",
     "pinia-plugin-persistedstate": "^1.6.1",
     "tmi.js": "^1.8.5",
-    "vue": "^3.2.36"
+    "vue": "^3.2.36",
+    "vue-router": "^4.1.6"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.1.0",

@@ -1,0 +1,33 @@
+{
+  "enable_profile_picture" : {
+    "type": "checkbox",
+    "value": true
+  },
+  "sub_alert_placement": {
+    "type": "select",
+    "multiple": false,
+    "value": "center center",
+    "options": [
+      "center center",
+      "center left",
+      "center right",
+      "top center",
+      "top left",
+      "top right",
+      "bottom center",
+      "bottom left",
+      "bottom right"
+    ]
+  },
+  "automated_shoutouts": {
+    "type": "select",
+    "multiple": false,
+    "value": "None",
+    "options": [
+      "None",
+      "Tier 1",
+      "Tier 2",
+      "Tier 3"
+    ]
+  }
+}
