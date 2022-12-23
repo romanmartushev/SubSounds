@@ -3,8 +3,10 @@ import EventQueue from "./js/EventQueue";
 import tmi from "tmi.js";
 import { useSubStore } from "./stores/subs";
 import axios from "axios";
+import ModalComponent from "./components/ModalComponent.vue";
 
 export default {
+  components: { ModalComponent },
   data() {
     return {
       client: null,
@@ -14,7 +16,12 @@ export default {
           clientId: import.meta.env.VITE_CLIENT_ID,
           skipUpdatingEmotesets: true,
         },
+        identity: {
+          username: import.meta.env.VITE_TWITCH_CHANNEL,
+          password: import.meta.env.VITE_TWITCH_OAUTH,
+        },
       },
+      config: {},
       broadcaster: import.meta.env.VITE_TWITCH_CHANNEL,
       eventQueue: new EventQueue(),
       subs: useSubStore(),
@@ -25,9 +32,22 @@ export default {
         text: "",
         isVideo: false,
       },
+      testing: false,
     };
   },
   async mounted() {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    this.testing = urlParams.has("testing");
+
+    this.config = await axios
+      .get("/config.json", {
+        responseType: "json",
+      })
+      .then((response) => {
+        return response.data;
+      });
+
     this.client = new tmi.client(this.opts);
     this.client.on("message", this.onMessageHandler);
     this.client.on("connected", this.onConnectedHandler);
@@ -56,23 +76,16 @@ export default {
       console.log(`* Connected to ${addr}:${port}`);
     },
     onMessageHandler(target, context, msg, self) {
-      this.subSound(context);
-    },
-    subSound(context) {
-      /**
-       * To test set if condition to:
-       * context.subscriber
-       *
-       * for stream set if to:
-       * context.subscriber &&
-       * !this.subs.has(context.username) &&
-       * context.username !== this.broadcaster
-       */
-      if (
+      let condition =
         context.subscriber &&
         !this.subs.has(context.username) &&
-        context.username !== this.broadcaster
-      ) {
+        context.username !== this.broadcaster;
+
+      if (this.testing) {
+        condition = context.subscriber && !this.subs.has(context.username);
+      }
+
+      if (condition) {
         const vm = this;
         axios
           .get(`https://api.twitch.tv/helix/users?id=${context["user-id"]}`, {
@@ -88,7 +101,10 @@ export default {
             vm.eventQueue.add(vm.setModal, [
               true,
               activeSub.profile_image_url,
-              `${activeSub.display_name} has arrived!`,
+              this.subAlertText(
+                vm.config.alert_text["value"],
+                activeSub.display_name
+              ),
             ]);
             axios.get(`/subSounds/${context.username}.mp3`).then(() => {
               vm.eventQueue.add(vm.playSound, [
@@ -97,6 +113,19 @@ export default {
             });
           });
         this.subs.add(context);
+        this.handleShoutOut(context);
+      }
+    },
+    handleShoutOut(context) {
+      const autoShouout = this.config.automated_shoutouts["value"];
+      const tierList = {
+        None: 999999,
+        "Tier 1": 1000,
+        "Tier 2": 2000,
+        "Tier 3": 3000,
+      };
+      if (parseInt(context.badges.subscriber) >= tierList[autoShouout]) {
+        this.client.say(this.broadcaster, `!so @${context["display-name"]}`);
       }
     },
     playSound(sound) {
@@ -124,20 +153,33 @@ export default {
         resolve();
       });
     },
+    subAlertText(string, name) {
+      return string.replace("[name]", name);
+    },
   },
 };
 </script>
 
 <template>
   <transition name="bounce">
-    <div
-      class="absolute w-full h-full flex flex-col justify-center items-center"
-      v-if="modal.active"
-    >
-      <img class="w-1/5" :src="modal.src" />
-      <h2 class="text-5xl mt-1 p-2 pl-6 bg-black text-white">
-        {{ modal.text }}
-      </h2>
-    </div>
+    <modal-component
+      v-if="Object.keys(config).length !== 0"
+      :position="config.alert_placement['value']"
+      :show="modal.active"
+      :show-image="config.show_profile_picture['value']"
+      :show-text="config.show_alert_text['value']"
+      :image-src="modal.src"
+      :text="modal.text"
+      :text-size="config.alert_text_font_size['value']"
+      :text-color="config.alert_text_color['value']"
+      :text-bg-color="config.alert_text_background_color['value']"
+    />
   </transition>
+  <button
+    class="bg-red-500 py-1 px-2 rounded m-3 text-white"
+    v-if="testing"
+    @click="subs.$reset()"
+  >
+    Reset
+  </button>
 </template>
