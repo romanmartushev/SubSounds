@@ -28,7 +28,7 @@ in this (SubSounds) directory, this will start up the server.
 
 Once the server is running head on over to [Setup](http://localhost:3030/setup).
 Once you are done customizing make sure to hit the save button. This will trigger a download.
-After the file is downloaded, replace `/public/config.json` with the newly downloaded file.
+After the file is downloaded, replace/place newly downloaded file into `/public/my-config.json`.
 
 ### OBS
 - Create new browser source with URL: http://localhost:3030/

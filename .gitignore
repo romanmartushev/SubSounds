@@ -27,3 +27,5 @@ coverage
 *.sln
 *.sw?
 .env
+public/subSounds/*
+my-config.json

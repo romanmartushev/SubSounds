@@ -40,13 +40,7 @@ export default {
     const urlParams = new URLSearchParams(queryString);
     this.testing = urlParams.has("testing");
 
-    this.config = await axios
-      .get("/config.json", {
-        responseType: "json",
-      })
-      .then((response) => {
-        return response.data;
-      });
+    this.config = await this.getConfig();
 
     this.client = new tmi.client(this.opts);
     this.client.on("message", this.onMessageHandler);
@@ -72,6 +66,24 @@ export default {
     },
   },
   methods: {
+    async getConfig() {
+      return await axios
+        .get("/my-config.json", {
+          responseType: "json",
+        })
+        .then((response) => {
+          return response.data;
+        })
+        .catch(async () => {
+          return await axios
+            .get("/config.json", {
+              responseType: "json",
+            })
+            .then((response) => {
+              return response.data;
+            });
+        });
+    },
     onConnectedHandler(addr, port) {
       console.log(`* Connected to ${addr}:${port}`);
     },

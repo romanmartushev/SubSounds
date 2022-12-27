@@ -43,8 +43,8 @@
       </p>
     </div>
     <p class="text-gray-300">
-      After Saving, place the downloaded config.json in place of
-      <code>/public/config.json</code>
+      After Saving, replace/place the downloaded my-config.json into
+      <code>/public/my-config.json</code>
     </p>
     <button
       class="bg-blue-600 py-1 px-2 rounded text-white"
@@ -101,16 +101,25 @@ export default {
     getConfig() {
       const vm = this;
       axios
-        .get("/config.json", {
+        .get("/my-config.json", {
           responseType: "json",
         })
         .then((response) => {
           vm.config = response.data;
+        })
+        .catch(() => {
+          axios
+            .get("/config.json", {
+              responseType: "json",
+            })
+            .then((response) => {
+              vm.config = response.data;
+            });
         });
     },
     saveConfig() {
-      const file = new File([JSON.stringify(this.config)], "config.json");
-      saveAs(file, "config.json");
+      const file = new File([JSON.stringify(this.config)], "my-config.json");
+      saveAs(file, "my-config.json");
     },
   },
 };
