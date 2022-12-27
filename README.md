@@ -56,6 +56,6 @@ npm run dev
 
 should get message in terminal saying `dev server running at: http://localhost:3030/`.
 Keep the terminal window open, this allows the program to continue running in the background. 
-Then refresh browser source in OBS so that it can connect to the dev server, also you must click-on/interact with the browser source in so that it is allowed to play the sounds.
+Then refresh browser source in OBS so that it can connect to the dev server.
 
 
