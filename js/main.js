@@ -138,9 +138,6 @@ const app = createApp({
     subAlertText(string, name) {
       return string.replace("[name]", name);
     },
-    resetSubs() {
-      this.subs = new Subs();
-    },
   },
 });
 
