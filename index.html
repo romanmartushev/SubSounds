@@ -2,14 +2,42 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sub Sounds</title>
+      <script src="./js/vendor/tailwind.js"></script>
+      <link rel="stylesheet" href="./css/styles.css">
+      <script src="./js/vendor/vue.js"></script>
+      <script src="./js/vendor/tmi.min.js"></script>
+      <script src="./js/EventQueue.js"></script>
+      <script src="./js/Subs.js"></script>
+      <script src="./js/env.js"></script>
+      <script src="./js/config.js"></script>
+      <script src="./js/my-config.js"></script>
   </head>
   <body class="m-0 p-0">
     <div id="app" class="h-screen w-screen overflow-x-hidden">
-        <router-view></router-view>
+        <transition name="bounce">
+            <modal-component
+                v-if="Object.keys(config).length !== 0"
+                :position="config.alert_placement['value']"
+                :show="modal.active"
+                :show-image="config.show_profile_picture['value']"
+                :show-text="config.show_alert_text['value']"
+                :image-src="modal.src"
+                :text="modal.text"
+                :text-size="config.alert_text_font_size['value']"
+                :text-color="config.alert_text_color['value']"
+                :text-bg-color="config.alert_text_background_color['value']"
+            ></modal-component>
+        </transition>
+        <button
+            class="bg-red-500 py-1 px-2 rounded m-3 text-white"
+            v-if="testing"
+            @click="subs.reset()"
+        >
+            Reset
+        </button>
     </div>
-    <script type="module" src="/src/main.js"></script>
+    <script src="./js/main.js"></script>
   </body>
 </html>

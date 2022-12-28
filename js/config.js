@@ -1,4 +1,4 @@
-{
+var config = {
   "alert_placement": {
     "type": "select",
     "value": "center center",
@@ -64,4 +64,4 @@
     "options": ["None", "Tier 1", "Tier 2", "Tier 3"],
     "comments": "Selecting a lower Tier includes all Tiers above it.(ex: Tier 2 includes Tier 2 & 3). You will need a registered !so command."
   }
-}
+};

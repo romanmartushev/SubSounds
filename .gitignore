@@ -26,6 +26,6 @@ coverage
 *.njsproj
 *.sln
 *.sw?
-.env
-public/subSounds/*
-my-config.json
+js/env.js
+subSounds/*
+js/my-config.js
