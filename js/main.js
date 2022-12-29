@@ -82,20 +82,51 @@ const app = createApp({
               context.profile_image_url = activeSub.profile_image_url;
               context.display_name = activeSub.display_name;
               vm.eventQueue.add(vm.setModal, [
-                true,
+                `./subSounds/${context.username}.mp3`,
                 activeSub.profile_image_url,
                 this.subAlertText(
                     vm.config.alert_text["value"],
                     activeSub.display_name
                 ),
               ]);
-              vm.eventQueue.add(vm.playSound, [
-                `./subSounds/${context.username}.mp3`,
-              ]);
             });
         this.subs.add(context);
         this.handleShoutOut(context);
       }
+    },
+    setModal(sound, img = "", text = "") {
+      return new Promise((resolve) => {
+        this.modal = {
+          active: true,
+          src: img,
+          text: text,
+        };
+        const vm = this;
+        const audio = new Audio(sound);
+        audio.play();
+        audio.onended = function() {
+          vm.modal = {
+            active: false,
+            src: "",
+            text: "",
+          };
+          setTimeout(() => {
+            resolve();
+          },2000)
+        };
+        audio.onerror = function() {
+          setTimeout(() => {
+            vm.modal = {
+              active: false,
+              src: "",
+              text: "",
+            };
+            setTimeout(() => {
+              resolve();
+            },2000)
+          }, 5000);
+        };
+      });
     },
     handleShoutOut(context) {
       const autoShouout = this.config.automated_shoutouts["value"];
@@ -108,32 +139,6 @@ const app = createApp({
       if (parseInt(context.badges.subscriber) >= tierList[autoShouout]) {
         this.client.say(this.broadcaster, `!so @${context["display-name"]}`);
       }
-    },
-    playSound(sound) {
-      return new Promise((resolve) => {
-        const audio = new Audio(sound);
-        audio.play();
-        audio.onended = resolve;
-        audio.onerror = resolve;
-      });
-    },
-    setModal(active = false, img = "", text = "", time = 5000) {
-      return new Promise((resolve) => {
-        this.modal = {
-          active: active,
-          src: img,
-          text: text,
-        };
-        const vm = this;
-        setTimeout(() => {
-          vm.modal = {
-            active: false,
-            src: "",
-            text: "",
-          };
-        }, time);
-        resolve();
-      });
     },
     subAlertText(string, name) {
       return string.replace("[name]", name);
