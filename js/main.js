@@ -17,6 +17,7 @@ const app = createApp({
       },
       config,
       broadcaster: env.channel,
+      broadcaster_id: "",
       eventQueue: new EventQueue(),
       subs: new Subs(),
       auth_token: "",
@@ -44,6 +45,17 @@ const app = createApp({
     }).then((response) => response.json())
         .then((data) => {
           return data.access_token;
+        });
+
+    this.broadcaster_id = await fetch(`https://api.twitch.tv/helix/users?login=${this.broadcaster}`, {
+      headers: {
+        Authorization: `Bearer ${this.auth_token}`,
+        "Client-Id": env.client_id,
+      },
+    })
+        .then((response) => response.json())
+        .then((data) => {
+          return data.data[0].id;
         });
   },
   watch: {
@@ -129,16 +141,28 @@ const app = createApp({
       });
     },
     handleShoutOut(context) {
-      const autoShouout = this.config.automated_shoutouts["value"];
-      const tierList = {
-        None: 999999,
-        "Tier 1": 1000,
-        "Tier 2": 2000,
-        "Tier 3": 3000,
-      };
-      if (parseInt(context.badges.subscriber) >= tierList[autoShouout]) {
-        this.client.say(this.broadcaster, `!so @${context["display-name"]}`);
-      }
+      const vm = this;
+      fetch(`https://api.twitch.tv/helix/subscriptions?broadcaster_id=${vm.broadcaster_id}&user_id=${context["user-id"]}`, {
+        headers: {
+          Authorization: `Bearer ${env.sub_oauth}`,
+          "Client-Id": env.client_id,
+        },
+      })
+          .then((response) => response.json())
+          .then((data) => {
+            const tier = data.data[0].tier;
+
+            const autoShouout = vm.config.automated_shoutouts["value"];
+            const tierList = {
+              None: 999999,
+              "Tier 1": 1000,
+              "Tier 2": 2000,
+              "Tier 3": 3000,
+            };
+            if (parseInt(tier) >= tierList[autoShouout]) {
+              vm.client.say(vm.broadcaster, `!so @${context["display-name"]}`);
+            }
+          });
     },
     subAlertText(string, name) {
       return string.replace("[name]", name);
