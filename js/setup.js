@@ -4,7 +4,12 @@ const app = createApp({
 	data() {
 		return {
 			config,
+			url: "",
+			env,
 		};
+	},
+	mounted() {
+		this.url = `https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=${this.env.client_id}&redirect_uri=http://localhost&scope=channel_subscriptions`;
 	},
 	methods: {
 		subAlertText(string, name) {
